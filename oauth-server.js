@@ -175,8 +175,8 @@ app.post("/oauth/login", async (req, res) => {
     callbackUrl.searchParams.set("code", code);
     callbackUrl.searchParams.set("state", state);
     res.redirect(callbackUrl.toString());
-
-  } catch (err) {
+  }
+    catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: "server_error" });
   }
