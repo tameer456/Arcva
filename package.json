@@ -1,3 +1,6 @@
+"scripts": {
+  "start": "node oauth-server.js"
+}
 {
   "name": "arcva-mcp",
   "version": "1.0.0",
