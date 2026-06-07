@@ -32,6 +32,19 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "arcva-mcp", version: "1.0.0" });
 });
 
+// OAuth discovery endpoint — Claude reads this automatically
+app.get("/.well-known/oauth-authorization-server", (req, res) => {
+  res.json({
+    issuer: "https://mcp.arcva.app",
+    authorization_endpoint: "https://mcp.arcva.app/oauth/authorize",
+    token_endpoint: "https://mcp.arcva.app/oauth/token",
+    revocation_endpoint: "https://mcp.arcva.app/oauth/revoke",
+    response_types_supported: ["code"],
+    grant_types_supported: ["authorization_code"],
+    code_challenge_methods_supported: ["S256"],
+  });
+});
+
 // ── GET /oauth/authorize ─────────────────────────────────────────────────────
 // Anthropic redirects Claude users here to begin auth
 app.get("/oauth/authorize", (req, res) => {
