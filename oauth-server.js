@@ -45,6 +45,18 @@ app.get("/.well-known/oauth-authorization-server", (req, res) => {
   });
 });
 
+// Dynamic client registration
+app.post("/oauth/register", (req, res) => {
+  res.json({
+    client_id: "arcva_mcp_client",
+    client_secret: "arcva_secret_2025",
+    redirect_uris: req.body.redirect_uris || [],
+    grant_types: ["authorization_code"],
+    response_types: ["code"],
+    token_endpoint_auth_method: "client_secret_post",
+  });
+});
+
 // ── GET /oauth/authorize ─────────────────────────────────────────────────────
 // Anthropic redirects Claude users here to begin auth
 app.get("/oauth/authorize", (req, res) => {
