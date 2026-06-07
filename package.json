@@ -1,27 +1,22 @@
-"scripts": {
-  "start": "node oauth-server.js"
-}
 {
   "name": "arcva-mcp",
   "version": "1.0.0",
   "description": "Arcva MCP Server — AI-powered startup OS for Claude",
   "type": "module",
-  "main": "index.js",
+  "main": "oauth-server.js",
   "scripts": {
-    "start": "node index.js",
-    "start:oauth": "node oauth-server.js",
-    "dev": "node --watch index.js"
+    "start": "node oauth-server.js"
   },
   "keywords": ["mcp", "arcva", "startup", "ai", "claude"],
   "author": "Arcva",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
     "cors": "^2.8.5",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.0",
     "node-fetch": "^3.3.0",
-    "zod": "^3.25.0 || ^4.0.0"
+    "zod": "^3.22.0"
   },
   "engines": {
     "node": ">=18.0.0"
