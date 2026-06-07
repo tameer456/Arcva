@@ -154,8 +154,8 @@ app.post("/oauth/login", async (req, res) => {
     if (!authRes.ok) {
       return res.status(401).send(`
         <h2 style="font-family:Arial;color:red;padding:20px">
-        Login failed. Check your email/password and try again.<br><br>
-        Error: ${await authRes.text()}
+          Login failed. Check your email/password and try again.<br><br>
+          Error: ${await authRes.text()}
         </h2>
       `);
 
