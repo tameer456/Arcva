@@ -62,9 +62,10 @@ app.post("/oauth/register", (req, res) => {
 app.get("/oauth/authorize", (req, res) => {
   const { client_id, redirect_uri, state, response_type } = req.query;
 
-  if (response_type !== "code") {
-    return res.status(400).json({ error: "unsupported_response_type" });
-  }
+  if (response_type && !["code", "token"].includes(response_type)) {
+  return res.status(400).json({ error: "unsupported_response_type" });
+}
+  
 
   // Render the Arcva login page
   res.send(`
