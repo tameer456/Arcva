@@ -152,8 +152,12 @@ app.post("/oauth/login", async (req, res) => {
     });
 
     if (!authRes.ok) {
-      return res.redirect(`/oauth/authorize?error=invalid_credentials&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&client_id=${client_id}`);
-    }
+      return res.status(401).send(`
+        <h2 style="font-family:Arial;color:red;padding:20px">
+        Login failed. Check your email/password and try again.<br><br>
+        Error: ${await authRes.text()}
+        </h2>
+      `);
 
     const authData = await authRes.json();
     const userToken = authData.token || authData.access_token;
