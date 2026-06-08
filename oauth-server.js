@@ -103,7 +103,7 @@ app.get("/oauth/authorize", (req, res) => {
 app.post("/oauth/login", async (req, res) => {
   const { email, password, redirect_uri, state, client_id } = req.body;
   try {
-    const authRes = await fetch("https://arcva.app/api/apps/6a1e7db0584fc5296b3417c8/log-user-in-app/login", {
+    const authRes = await fetch("https://arcva.app/api/apps/6a1e7db0584fc5296b3417c8/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, app_id: "6a1e7db0584fc5296b3417c8" }),
@@ -114,7 +114,7 @@ app.post("/oauth/login", async (req, res) => {
       return res.redirect(`/oauth/authorize?error=invalid_credentials&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&client_id=${client_id}`);
     }
     const authData = await authRes.json();
-    const userToken = authData.token || authData.access_token || authData.jwt;
+    const userToken = authData.token || authData.access_token || authData.jwt || authData.sessionToken || authData.id_token || Object.values(authData).find(v => typeof v === 'string' && v.length > 50);
     if (!userToken) {
       console.error("No token in Base44 response:", JSON.stringify(authData));
       return res.redirect(`/oauth/authorize?error=no_token&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}&client_id=${client_id}`);
