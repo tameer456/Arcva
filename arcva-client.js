@@ -5,7 +5,7 @@
  */
 
 const BASE44_APP_ID = "6a1e7db0584fc5296b3417c8";
-const BASE_URL = `https://api.base44.com/api/apps/${BASE44_APP_ID}/entities`;
+const BASE_URL = `https://arcva.app/api/apps/${BASE44_APP_ID}/entities`;
 
 export class ArcvaClient {
   constructor(token) {
@@ -13,7 +13,6 @@ export class ArcvaClient {
     this.headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`,
-      "api-key": token,
     };
   }
 
