@@ -13,6 +13,7 @@ export class ArcvaClient {
     this.headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`,
+      "api-key": token,
     };
   }
 
