@@ -13,6 +13,29 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "arcva-mcp", version: "1.0.0" });
 });
 
+app.get("/.well-known/oauth-protected-resource", (req, res) => {
+  res.json({
+    resource: "https://mcp.arcva.app",
+    authorization_servers: ["https://mcp.arcva.app"],
+  });
+});
+
+app.post("/", async (req, res) => {
+  res.json({
+    jsonrpc: "2.0",
+    id: req.body?.id || null,
+    result: {
+      protocolVersion: "2024-11-05",
+      capabilities: { tools: {} },
+      serverInfo: { name: "arcva", version: "1.0.0" },
+    },
+  });
+});
+
+app.get("/", async (req, res) => {
+  res.json({ service: "arcva-mcp", version: "1.0.0" });
+});
+
 app.get("/.well-known/oauth-authorization-server", (req, res) => {
   res.json({
     issuer: "https://mcp.arcva.app",
