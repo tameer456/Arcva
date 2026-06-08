@@ -21,15 +21,145 @@ app.get("/.well-known/oauth-protected-resource", (req, res) => {
 });
 
 app.post("/", async (req, res) => {
-  res.json({
-    jsonrpc: "2.0",
-    id: req.body?.id || null,
-    result: {
-      protocolVersion: "2024-11-05",
-      capabilities: { tools: {} },
-      serverInfo: { name: "arcva", version: "1.0.0" },
-    },
-  });
+  const { method, id, params } = req.body || {};
+
+  // Initialize
+  if (method === "initialize") {
+    return res.json({
+      jsonrpc: "2.0", id,
+      result: {
+        protocolVersion: "2024-11-05",
+        capabilities: { tools: {} },
+        serverInfo: { name: "arcva", version: "1.0.0" },
+      },
+    });
+  }
+
+  // List tools
+  if (method === "tools/list") {
+    return res.json({
+      jsonrpc: "2.0", id,
+      result: {
+        tools: [
+          { name: "get_startup_context", description: "Get the full context of the user's startup — name, industry, stage, goals, and budget.", inputSchema: { type: "object", properties: { token: { type: "string" } }, required: ["token"] } },
+          { name: "manage_tasks", description: "Create, list, or update tasks in the Arcva roadmap.", inputSchema: { type: "object", properties: { token: { type: "string" }, action: { type: "string", enum: ["list", "create", "update"] }, title: { type: "string" }, status: { type: "string" }, priority: { type: "string" } }, required: ["token", "action"] } },
+          { name: "track_financials", description: "Log revenue or expenses, or get a financial summary.", inputSchema: { type: "object", properties: { token: { type: "string" }, action: { type: "string", enum: ["log", "summary"] }, type: { type: "string" }, amount: { type: "number" } }, required: ["token", "action"] } },
+          { name: "business_advisor", description: "Ask the Arcva AI Business Advisor a question about your startup.", inputSchema: { type: "object", properties: { token: { type: "string" }, question: { type: "string" } }, required: ["token", "question"] } },
+          { name: "research_competitor", description: "Add, list, or retrieve competitors tracked in Arcva.", inputSchema: { type: "object", properties: { token: { type: "string" }, action: { type: "string", enum: ["list", "add", "update"] }, name: { type: "string" } }, required: ["token", "action"] } },
+          { name: "create_marketing_content", description: "Generate and save marketing content to Arcva.", inputSchema: { type: "object", properties: { token: { type: "string" }, action: { type: "string", enum: ["create", "list"] }, title: { type: "string" }, content: { type: "string" } }, required: ["token", "action"] } },
+        ],
+      },
+    });
+  }
+
+  // Call tool
+  if (method === "tools/call") {
+    const { name, arguments: args } = params || {};
+    const token = args?.token || req.headers.authorization?.replace("Bearer ", "");
+
+    try {
+      const { ArcvaClient } = await import("./arcva-client.js");
+      const client = new ArcvaClient(token);
+
+      if (name === "get_startup_context") {
+        const businesses = await client.query("Business", {}, 1);
+        const b = businesses[0];
+        return res.json({
+          jsonrpc: "2.0", id,
+          result: { content: [{ type: "text", text: JSON.stringify(b?.data || "No business profile found", null, 2) }] },
+        });
+      }
+
+      if (name === "manage_tasks") {
+        if (args.action === "list") {
+          const tasks = await client.query("Task", {}, 50);
+          return res.json({
+            jsonrpc: "2.0", id,
+            result: { content: [{ type: "text", text: JSON.stringify(tasks.map(t => ({ id: t.id, ...t.data })), null, 2) }] },
+          });
+        }
+        if (args.action === "create") {
+          const record = await client.create("Task", { title: args.title, status: args.status || "not_started", priority: args.priority || "medium" });
+          return res.json({
+            jsonrpc: "2.0", id,
+            result: { content: [{ type: "text", text: `Task "${args.title}" created. ID: ${record.id}` }] },
+          });
+        }
+      }
+
+      if (name === "track_financials") {
+        if (args.action === "summary") {
+          const transactions = await client.query("Transaction", {}, 500);
+          const revenue = transactions.filter(t => t.data.type === "revenue").reduce((s, t) => s + (t.data.amount || 0), 0);
+          const expenses = transactions.filter(t => t.data.type === "expense").reduce((s, t) => s + (t.data.amount || 0), 0);
+          return res.json({
+            jsonrpc: "2.0", id,
+            result: { content: [{ type: "text", text: JSON.stringify({ revenue, expenses, net: revenue - expenses }, null, 2) }] },
+          });
+        }
+        if (args.action === "log") {
+          const record = await client.create("Transaction", { type: args.type, amount: args.amount, date: new Date().toISOString().split("T")[0] });
+          return res.json({
+            jsonrpc: "2.0", id,
+            result: { content: [{ type: "text", text: `Transaction logged. ID: ${record.id}` }] },
+          });
+        }
+      }
+
+      if (name === "research_competitor") {
+        if (args.action === "list") {
+          const competitors = await client.query("Competitor", {}, 50);
+          return res.json({
+            jsonrpc: "2.0", id,
+            result: { content: [{ type: "text", text: JSON.stringify(competitors.map(c => ({ id: c.id, ...c.data })), null, 2) }] },
+          });
+        }
+        if (args.action === "add") {
+          const record = await client.create("Competitor", { name: args.name });
+          return res.json({
+            jsonrpc: "2.0", id,
+            result: { content: [{ type: "text", text: `Competitor "${args.name}" added. ID: ${record.id}` }] },
+          });
+        }
+      }
+
+      if (name === "create_marketing_content") {
+        if (args.action === "list") {
+          const items = await client.query("MarketingContent", {}, 50);
+          return res.json({
+            jsonrpc: "2.0", id,
+            result: { content: [{ type: "text", text: JSON.stringify(items.map(i => ({ id: i.id, ...i.data })), null, 2) }] },
+          });
+        }
+        if (args.action === "create") {
+          const record = await client.create("MarketingContent", { title: args.title, content: args.content });
+          return res.json({
+            jsonrpc: "2.0", id,
+            result: { content: [{ type: "text", text: `Content "${args.title}" saved. ID: ${record.id}` }] },
+          });
+        }
+      }
+
+      if (name === "business_advisor") {
+        return res.json({
+          jsonrpc: "2.0", id,
+          result: { content: [{ type: "text", text: `Advisor received: ${args.question}` }] },
+        });
+      }
+
+      return res.json({ jsonrpc: "2.0", id, error: { code: -32601, message: `Tool not found: ${name}` } });
+
+    } catch (err) {
+      return res.json({ jsonrpc: "2.0", id, error: { code: -32000, message: err.message } });
+    }
+  }
+
+  // Notifications (no response needed)
+  if (method?.startsWith("notifications/")) {
+    return res.status(204).send();
+  }
+
+  return res.json({ jsonrpc: "2.0", id, error: { code: -32601, message: "Method not found" } });
 });
 
 app.get("/", async (req, res) => {
