@@ -103,7 +103,7 @@ app.get("/oauth/authorize", (req, res) => {
 app.post("/oauth/login", async (req, res) => {
   const { email, password, redirect_uri, state, client_id } = req.body;
   try {
-    const authRes = await fetch("https://api.base44.com/api/auth/login", {
+    const authRes = await fetch("https://arcva.app/api/apps/6a1e7db0584fc5296b3417c8/log-user-in-app/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password, app_id: "6a1e7db0584fc5296b3417c8" }),
