@@ -10,6 +10,11 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { ArcvaClient } from "./arcva-client.js";
+import express from "express";
+import cors from "cors";
+const app = express();
+app.use(cors());
+app.use(express.json());
 
 const server = new McpServer({
   name: "arcva",
@@ -445,6 +450,22 @@ server.tool(
 );
 
 // ── Start server ─────────────────────────────────────────────────────────────
-const transport = new StdioServerTransport();
-await server.connect(transport);
-console.error("Arcva MCP server running.");
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+
+const transport = new StreamableHTTPServerTransport({
+  sessionIdGenerator: undefined,
+});
+
+app.post("/mcp", async (req, res) => {
+  await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
+});
+
+app.get("/mcp", async (req, res) => {
+  await transport.handleRequest(req, res);
+});
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Arcva MCP server running on port ${PORT}`);
+});
