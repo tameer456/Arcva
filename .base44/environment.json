@@ -1,0 +1,18 @@
+{
+  "previewPort": 3000,
+  "healthPath": "/health",
+  "startCommand": "docker compose -f docker-compose.base44.yml up -d",
+  "secrets": [
+    {
+      "name": "ANTHROPIC_API_KEY",
+      "description": "Anthropic API key — powers the business_advisor tool. Get it from https://console.anthropic.com/settings/keys",
+      "requiredAtBoot": false
+    },
+    {
+      "name": "OAUTH_CLIENT_SECRET",
+      "description": "OAuth client secret for the MCP OAuth registration endpoint. Self-defined when submitting to Anthropic.",
+      "requiredAtBoot": false,
+      "generatedForDevelopment": true
+    }
+  ]
+}
