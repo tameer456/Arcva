@@ -345,7 +345,45 @@ app.post("/oauth/revoke", (req, res) => {
 // MCP JSON-RPC ENDPOINT
 // ════════════════════════════════════════════════════════════════════════════
 app.get("/", (req, res) => {
-  res.json({ service: "arcva-mcp", version: "1.0.0" });
+  res.setHeader("Content-Type", "text/html");
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arcva MCP Server</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f1117; color: #e4e4e7; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .card { max-width: 520px; width: 90%; padding: 48px 40px; }
+  .icon { width: 56px; height: 56px; margin-bottom: 24px; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .version { color: #71717a; font-size: 14px; margin-bottom: 32px; }
+  .status { display: inline-flex; align-items: center; gap: 8px; background: #18181b; border: 1px solid #27272a; border-radius: 999px; padding: 8px 16px; font-size: 14px; margin-bottom: 32px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+  .endpoints { display: flex; flex-direction: column; gap: 12px; }
+  .endpoint { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #18181b; border: 1px solid #27272a; border-radius: 8px; }
+  .method { font-size: 12px; font-weight: 700; color: #818cf8; min-width: 40px; }
+  .path { font-family: monospace; font-size: 14px; color: #a1a1aa; }
+  .desc { font-size: 13px; color: #71717a; margin-left: auto; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <h1>Arcva MCP Server</h1>
+    <p class="version">v1.0.0 — AI-powered startup OS for Claude</p>
+    <div class="status"><span class="dot"></span> Running</div>
+    <div class="endpoints">
+      <div class="endpoint"><span class="method">GET</span><span class="path">/health</span><span class="desc">Health check</span></div>
+      <div class="endpoint"><span class="method">POST</span><span class="path">/mcp</span><span class="desc">MCP JSON-RPC</span></div>
+      <div class="endpoint"><span class="method">GET</span><span class="path">/oauth/authorize</span><span class="desc">OAuth login</span></div>
+      <div class="endpoint"><span class="method">POST</span><span class="path">/oauth/token</span><span class="desc">Token exchange</span></div>
+      <div class="endpoint"><span class="method">GET</span><span class="path">/.well-known/oauth-authorization-server</span><span class="desc">Discovery</span></div>
+    </div>
+  </div>
+</body>
+</html>`);
 });
 
 app.post("/", async (req, res) => {
